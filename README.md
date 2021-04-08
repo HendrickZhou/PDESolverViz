@@ -1,6 +1,18 @@
 # PDESolverViz
 Visulization of PDE's Deep learning Solution
 
+
+## Pipeline
+用户输入柏森方程表达式以及边界条件
+表达式的左侧变化少，即Laplace算子，右侧侧变化比较多
+边界条件一般是一个y表达式，一个y导数表达式，和两者的组合
+我们目前只考虑二维柏森方程
+
+
+### 公式输入
+公式的输入方式：laTex公式，MathType公式
+
+最后公式要被转化成Pytorch或者TF算子
 ## 技术选型
 ### 可视化端
 1. JS可视化库调研：
@@ -50,3 +62,6 @@ redis是用缓存手段解决数据库高并发场景，而kafka是类似消息�
 
 ## 参考构架 - TFMeter项目
 typescript + d3.js，除此之外就没有使用任何框架，因为dl算法部分是用ts手写的，也没有用到后端服务器
+
+
+## 敏捷开发周期
