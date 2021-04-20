@@ -1,0 +1,27 @@
+{
+    "mode": "2d",
+    "elements": {
+        "Rect": {
+            "id" : "a",
+            "width": 500,
+            "height": 500
+        },
+        "Polygon": {
+            "id" : "a1",
+            "Points" : {
+                
+            }
+        }
+        "Circle": { 
+            "id" : "b",
+            "r": 250,
+            "center": [0,0],
+            "alignment": "center"
+        }
+    },
+    "operation": {
+
+    }
+
+
+}    

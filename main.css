@@ -38,7 +38,6 @@ body {
 
 #studio {
     background-color: rgb(51, 27, 27);
-    padding: 2px;
 
     display: flex;
     flex-direction: row;
@@ -65,7 +64,12 @@ body {
 
 #graph {
     width: 50%;
-    background-color: black;
+    background-color: white;
+
+    display: flex;
+}
+#graph p {
+    font-size: large;
 }
 
 

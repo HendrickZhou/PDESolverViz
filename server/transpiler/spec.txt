@@ -1,0 +1,60 @@
+简易的cad操作
+参数化
+支持边界的方程形式保存
+
+cut:IO库(maybe)，exceptions
+
+RUNTIME
+后端的Flask框架直接import 这个库，这个库是要负责python代码的执行
+Context读取file，编译代码，拿到code obj，然后进行transpile
+
+步骤
+分隔符划定了三种固定的代码块，严格按照逻辑先后顺序执行
+
+
+
+1.创建几何体素
+2.几何操作
+    1.布尔:并集，交集 和差集
+    2.变换:移动、复制、镜像 和阵列 
+    3.分割:(暂时不支持)
+    4.工作平面（3d only）
+3.装配
+
+1.primitives:
+2d：Polygon, Rect, Circle
+3d: Cube, Sphere, Cylinder, Polyhedrons
+'''
+Ploygon(
+    {
+        a:[0,0]
+        b:[2,3]
+        c:[1,2]
+    }
+)
+
+Rect({width:100, length:200, lr:[0,0], rt:[100, 200]})
+# 由于是polygon的特例，由于特征更多，支持多种定义，比如旋转角度
+'''
+
+2.布尔运算
+'''
+new_obj = union(obj1, obj2)
+diff(obj1, obj2)
+inter(obj1, obj2)
+'''
+
+3.变换
+'''
+scale(obj)
+rotate(obj)
+move(obj, direction)
+mirror()
+'''
+
+4.最后处理
+前面的所有操作都是solid（3d），最后要导出surface
+最后一步是规定我们的导出对象
+'''
+
+'''
