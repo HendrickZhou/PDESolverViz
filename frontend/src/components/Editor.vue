@@ -1,9 +1,9 @@
 <template>
 <div id="editor" ref="ed">
     <div id="epad-header">GeoScript Editor</div>
-    <Epad v-bind:style="{height: epadH + '%'}"></Epad>
+    <Epad v-bind:style="{height: epadH + '%'}" ref="formCode"></Epad>
     <HDrag @onDrag='onDrag'></HDrag>
-    <Econsole></Econsole>
+    <Econsole @onClickRun="onClickRun"></Econsole>
 </div>
 </template>
 
@@ -20,6 +20,7 @@ export default {
     data() {
         return {
             epadH: 70,
+            code: '',
         };
     },
     components: {
@@ -28,6 +29,9 @@ export default {
         Econsole,
     },
     methods: {
+        onClickRun() {
+            this.$refs.formCode.runCode();
+        },
         getHeight() {
             this.boxHeight = this.$refs.ed.clientHeight; 
             console.log(this.boxHeight);

@@ -29,10 +29,13 @@ class _Context:
     script_globals = ["primitive"]
     mode_flag = {"2D":1, "3D":2}
 
-    def __init__(self, filename):
+    def __init__(self, input, type=None):
         super().__init__()
-        self._read(filename)
-        self._preprocess()
+        if type == 'f':
+            self._read(input)
+            self._preprocess()
+        else:
+            self._preprocess_string(input)
         self._compile()
 
     # @classmethod
@@ -48,6 +51,24 @@ class _Context:
     # IO
     def _read(self, script_file):
         self.file = script_file
+
+    def _preprocess_string(self, code_str):
+        code_section = []
+        cur_section = ""
+        for ln, line in enumerate(code_str.splitlines()):
+            line = line + '\n'
+            if line[:2] == self.keywords["splitter"]:
+                code_section.append(cur_section)
+                cur_section = ""
+            else:
+                cur_section += line
+        code_section.append(cur_section)
+        if len(code_section) != self.SECTION_NUM:
+            print("not correct!")
+
+        self.code_config = code_section[0]
+        self.code_def = code_section[1]
+        self.code_export = code_section[2]
 
     def _preprocess(self):
         '''

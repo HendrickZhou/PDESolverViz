@@ -15,6 +15,7 @@
   import 'prismjs/themes/prism-tomorrow.css'; // import syntax highlighting styles
 
   import initCode from '!raw-loader!../assets/init_code.gs';
+  import axios from 'axios';
 
   export default {
     components: {
@@ -24,6 +25,17 @@
     methods: {
       highlighter(code) {
         return highlight(code, languages.js); // languages.<insert language> to return html with markup
+      },
+      runCode() {
+        const path = 'http://localhost:5000/submitCode';
+        axios.post(path, {"code": this.code})
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        this.code
       },
     },
   };

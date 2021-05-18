@@ -1,11 +1,9 @@
 <template>
 <div id="l-nav-bar">
-    <ul>
-        <li>file</li>
-        <li>Geometry</li>
-        <li>PDE</li>
-        <li>NN</li>
-    </ul>
+    <div class="tab"><b-icon icon="play">File</b-icon></div>
+    <div class="tab"><b-icon icon="play">Geometry</b-icon></div>
+    <div class="tab"><b-icon icon="play">PDE</b-icon></div>
+    <div class="tab"><b-icon icon="play">NN</b-icon></div>
 </div>
 </template>
 
@@ -17,8 +15,15 @@ export default {
 
 <style>
 #l-nav-bar {
-    flex:0;
-    width: 50px;
+    /* flex:0; */
+    width: 25px;
     background-color: rgb(51, 45, 45);
+    display: flex;
+    flex-direction: column;;
+}
+
+.tab {
+    width: 100%;
+    height: 50px;
 }
 </style>>

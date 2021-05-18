@@ -1,7 +1,8 @@
 <template>
     <div id="e-console">
         <div id='status-bar'>
-            <v-btn elevation="2" icon rounded></v-btn>
+            <b-button type='submit' size="sm" v-on:click="Run"><b-icon icon="play"></b-icon></b-button>
+            <div class="title">Console</div>
         </div>
         <div class="splitter"></div>
         <div id='console'></div>
@@ -11,6 +12,11 @@
 <script>
 export default {
     name: 'Econsole',
+    methods: {
+        Run() {
+            this.$emit('onClickRun');
+        }
+    }
 }
 </script>
 
@@ -20,9 +26,16 @@ export default {
 }
 #status-bar {
     height: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items:space-between;
 }
 .splitter {
     height: 1px;
     background-color: rgb(51, 45, 45);
+}
+.title {
+    text-align: center;
+    color: white;
 }
 </style>

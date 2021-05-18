@@ -36,6 +36,7 @@ import LeftBar from '@/components/LeftBar.vue';
 import Editor from '@/components/Editor.vue';
 import Graph from '@/components/Graph.vue';
 import VDrag from '@/components/drag/VDrag.vue';
+// import axios from 'axios';
 
 export default {
     name: 'Studio',
@@ -45,6 +46,7 @@ export default {
         Graph,
         VDrag,
     },
+
 };
 </script>
 
