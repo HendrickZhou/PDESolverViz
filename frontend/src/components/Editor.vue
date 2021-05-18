@@ -1,16 +1,16 @@
 <template>
 <div id="editor" ref="ed">
-    <!-- <div id="e-pad" v-bind:style="{height: epadH + '%'}"></div>
-     -->
+    <div id="epad-header">GeoScript Editor</div>
     <Epad v-bind:style="{height: epadH + '%'}"></Epad>
     <HDrag @onDrag='onDrag'></HDrag>
-    <div id="e-console"></div>
+    <Econsole></Econsole>
 </div>
 </template>
 
 <script>
 import HDrag from '@/components/drag/HDrag.vue';
 import Epad from './epad.vue';
+import Econsole from './Econsole.vue';
 
 export default {
     name: 'Editor',
@@ -25,6 +25,7 @@ export default {
     components: {
         HDrag,
         Epad,
+        Econsole,
     },
     methods: {
         getHeight() {
@@ -47,6 +48,9 @@ export default {
 <style>
 #editor {
     width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 #e-pad {
@@ -54,6 +58,10 @@ export default {
     width: 100%;
 }
 
-#e-console {
+#epad-header {
+    text-align: center;
+    color: white;
+    height: 25px;
 }
+
 </style>
