@@ -64,7 +64,7 @@ class Rectangle(_Geometry):
         super(Rectangle, self).__init__()
 
     def _build_xde_geom(self):
-        print(dg.__dir__())
+        # print(dg.__dir__())
         self.xde_geom = dg.Rectangle(self.xmin, self.xmax)
 
     def _build_js_geom(self):

@@ -4,24 +4,12 @@
     <div id="topbar">PDESolver</div>
 	<!--col-based content-->
 	<div id="content">
-		<!--left nav bar-->
         <LeftBar></LeftBar>
 		<!--打开默认是explorer + 说明-->
 		<!--选择完project后，默认展开editor+graph-->
 		<!--除此外的组合：PDE builder+graph; NN+graph; 或者单独graph+info tab-->
 		<!--explorer+spec-->
-		<!-- <div id="explorer"></div>
-		<div class="v-handler"></div>
-		<div id="spec"></div> -->
-
-		<!--editor+equation+nn-->
-		<Editor></Editor>
-		<!--equation-->
-		<div id="equation"></div>
-		<!--nn-->
-		<div id="nn"></div>
-
-		<!--graph-->
+        <router-view></router-view>
 		<VDrag></VDrag>
         <Graph></Graph>
 	</div>
@@ -33,7 +21,6 @@
 
 <script>
 import LeftBar from '@/components/LeftBar.vue';
-import Editor from '@/components/Editor.vue';
 import Graph from '@/components/Graph.vue';
 import VDrag from '@/components/drag/VDrag.vue';
 // import axios from 'axios';
@@ -42,7 +29,6 @@ export default {
     name: 'Studio',
     components: {
         LeftBar,
-        Editor,
         Graph,
         VDrag,
     },

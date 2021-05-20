@@ -14,11 +14,13 @@ e2 = Disk(
     1
 )
 
+e1
+
 ei1 = Interval(0,1)
 ei2 = Interval(0.5, 1.5)
 eix = ei1 - ei2
-
-#eix & e1
+eixx = eix - ei2
+ey = eixx & eix
 
 e = union(e1, e2) 
 result = e & e1

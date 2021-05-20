@@ -1,0 +1,63 @@
+{
+  "id": "result",
+  "content": null,
+  "children": [
+    {
+      "id": "BitAnd",
+      "content": null,
+      "children": [
+        {
+          "id": "e",
+          "content": null,
+          "children": [
+            {
+              "id": "BinOp",
+              "content": null,
+              "children": [
+                {
+                  "id": "e1",
+                  "content": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      1,
+                      1
+                    ]
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "e2",
+                  "content": [
+                    [
+                      0,
+                      0
+                    ],
+                    1
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "e1",
+          "content": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

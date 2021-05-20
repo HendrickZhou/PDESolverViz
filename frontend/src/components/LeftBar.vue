@@ -1,9 +1,16 @@
 <template>
 <div id="l-nav-bar">
-    <div class="tab"><b-icon icon="play">File</b-icon></div>
-    <div class="tab"><b-icon icon="play">Geometry</b-icon></div>
-    <div class="tab"><b-icon icon="play">PDE</b-icon></div>
-    <div class="tab"><b-icon icon="play">NN</b-icon></div>
+    <router-link to="/geometry">
+        <div class="tab"><b-icon icon="play">Geometry</b-icon></div>
+    </router-link>
+    <router-link to="/pde">
+        <div class="tab"><b-icon icon="play">PDE</b-icon></div>
+    </router-link>
+    <router-link to="/nn">
+        <div class="tab"><b-icon icon="play">NN</b-icon></div>
+    </router-link>
+    
+    
 </div>
 </template>
 
@@ -16,7 +23,7 @@ export default {
 <style>
 #l-nav-bar {
     /* flex:0; */
-    width: 25px;
+    width: 40px;
     background-color: rgb(51, 45, 45);
     display: flex;
     flex-direction: column;;

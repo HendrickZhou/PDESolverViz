@@ -30,12 +30,11 @@
         const path = 'http://localhost:5000/submitCode';
         axios.post(path, {"code": this.code})
           .then((res) => {
-            console.log(res);
+            this.$emit('onPrompt', res.data.prompt);
           })
           .catch((error) => {
             console.error(error);
           });
-        this.code
       },
     },
   };

@@ -5,17 +5,25 @@
             <div class="title">Console</div>
         </div>
         <div class="splitter"></div>
-        <div id='console'></div>
+        <div id='console'><span>{{prompt}}</span></div>
     </div>
 </template>
 
 <script>
 export default {
     name: 'Econsole',
+    data() {
+        return {
+            prompt: '>>>',
+        };
+    },
     methods: {
         Run() {
             this.$emit('onClickRun');
-        }
+        },
+        newPrompt(newVal) {
+            this.prompt = newVal;
+        },
     }
 }
 </script>
@@ -29,6 +37,9 @@ export default {
     display: flex;
     flex-direction: row;
     align-items:space-between;
+}
+#console {
+    color: white;
 }
 .splitter {
     height: 1px;
