@@ -1,32 +1,24 @@
 <template>
 <div id="architecture">
-<h4>Architecture</h4>
-<div class="layer">
-<div class="entry">
-    <div class="input-group">
-        <button class="btn btn-secondary btn-remove input-group-prepend"><span class="fa fa-minus"></span></button>
-        <input type="number" class="form-control" name="numberOfNodes" step="1" value="16" />
+<h4>网络结构</h4>
+<ul style="list-style-type:none;">
+    <li v-for="(node_num, index) in layers" :key="index"> 
+        <div class="layer">
+            <div class="entry">
+            <div class="input-group">
+                <button class="btn btn-secondary btn-remove input-group-prepend" v-on:click="delLayer(index)">删除层</button>
+                <input type="number" class="form-control" name="numberOfNodes" step="1" v-model="node_num.value" min="1"/>
+            </div>
+        </div><p>第{{index + 1}}层</p>
+        </div>
+    </li>
+</ul>
+<div class="layer" style="padding-left:50px;">
+    <div class="entry">
+        <div class="input-group">
+            <button class="btn btn-primary btn-add input-group-prepend" v-on:click="addLayer">增加层</button>
+        </div>
     </div>
-</div>
-<p>第1层</p>
-</div>
-<div class="layer">
-<div class="entry">
-    <div class="input-group">
-        <button class="btn btn-secondary btn-remove input-group-prepend"><span class="fa fa-minus"></span></button>
-        <input type="number" class="form-control" name="numberOfNodes" step="1" value="12" />
-    </div>
-</div>
-<p>第2层</p>
-</div>
-<div class="layer">
-<div class="entry">
-    <div class="input-group">
-        <button class="btn btn-primary btn-add input-group-prepend"><span class="fa fa-plus"></span></button>
-        <input type="number" class="form-control" name="numberOfNodes" step="1"/>
-    </div>
-</div>
-<p></p>
 </div>
 
 </div>
@@ -34,7 +26,31 @@
 
 <script>
 export default {
-    name: 'Arc'
+    name: 'Arc',
+    data() {
+        return {
+            layers : [
+                {"value": 10},
+                {"value": 5},
+                {"value": 2}
+            ],
+        }
+    },
+    methods: {
+        addLayer() {
+            this.layers.push({"value":3});
+        },
+        delLayer(index) {
+            this.layers.splice(index, 1);
+        },
+        getLayer() {
+            var layers_arr = [];
+            for(const layer of this.layers){
+                layers_arr.push(layer["value"])
+            }
+            return layers_arr
+        }
+    },
 }
 </script>
 

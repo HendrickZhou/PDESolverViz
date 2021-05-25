@@ -31,6 +31,7 @@
         axios.post(path, {"code": this.code})
           .then((res) => {
             this.$emit('onPrompt', res.data.prompt);
+            alert("计算域构建成功")
           })
           .catch((error) => {
             console.error(error);

@@ -1,0 +1,72 @@
+{
+  "id": "result",
+  "content": null,
+  "children": [
+    {
+      "id": "BitAnd",
+      "content": null,
+      "children": [
+        {
+          "id": "e",
+          "content": null,
+          "children": [
+            {
+              "id": "BitAnd",
+              "content": null,
+              "children": [
+                {
+                  "id": "e1",
+                  "content": {
+                    "params": [
+                      [
+                        0,
+                        0
+                      ],
+                      [
+                        1,
+                        1
+                      ]
+                    ],
+                    "type": "Rectangle"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "e2",
+                  "content": {
+                    "params": [
+                      [
+                        0,
+                        0
+                      ],
+                      1
+                    ],
+                    "type": "Disk"
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "e1",
+          "content": {
+            "params": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                1
+              ]
+            ],
+            "type": "Rectangle"
+          },
+          "children": []
+        }
+      ]
+    }
+  ]
+}
