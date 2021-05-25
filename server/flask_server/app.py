@@ -11,8 +11,10 @@ from equations import PoissonTranslator, BCTranslator
 from geo_script import Transpiler
 import deepxde as dde
 
-import json
+import matplotlib
+matplotlib.use('agg')
 
+import json
 
 # configuration
 DEBUG = True
@@ -23,6 +25,55 @@ app.config.from_object(__name__)
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
+
+class Backbone:
+    def __init__(self):
+        super().__init__()
+    
+    @staticmethod
+    def boundary(_, on_boundary):
+        return on_boundary
+
+    def get_geo(self, xde_obj):
+        self.geom = xde_obj
+
+    def get_equations(self, poisson, bc, bc_type):
+        if bc_type == "d": #dirichlet
+            self.bc = dde.DirichletBC(self.geom, bc, self.boundary)
+        else: #neumann
+            self.bc = dde.NeumannBC(self.geom, bc, self.boundary)
+        self.pde = poisson
+
+    def get_net(self, params_list):
+        data = dde.data.PDE(
+            self.geom, 
+            self.pde, 
+            self.bc, 
+            num_domain=params_list[9], 
+            num_boundary=params_list[10], 
+            train_distribution=params_list[12],
+            num_test=params_list[11])
+        net = dde.maps.FNN(
+            [2] + params_list[0] + [1],
+            activation = params_list[2],
+            kernel_initializer = params_list[4],
+            regularization=params_list[3],
+            dropout_rate=params_list[6],
+            batch_normalization=params_list[5])
+        self.model = dde.Model(data, net)
+        self.model.compile(
+            optimizer = params_list[7],
+            lr = params_list[1],
+            loss = params_list[8]
+        )
+
+    def run(self):
+        losshistory, train_state = self.model.train(epochs=5000)
+        dde.saveplot(losshistory, train_state, issave=False, isplot=True)
+    
+
+backbone = Backbone()
+
 
 
 @app.route('/submitCode', methods=['POST'])
@@ -35,8 +86,9 @@ def getCode():
     c = Transpiler(code_data)
     xde_obj_dicts, json_stream = c.run()
     print(json_stream)
-    # build xde model, lazy loading
-
+    # build xde model
+    geom_obj_id = xde_obj_dicts["target_id"]
+    backbone.get_geo(xde_obj_dicts[geom_obj_id].xde_geom)
     # transmit json file
     # mock the project id 
     import datetime
@@ -66,12 +118,17 @@ def getPDE():
     p = PoissonTranslator(var_str, poisson_str)
     # 暂时只支持一种bc
     if dbc_str != "":
-        dbc = BCTranslator(var_str, dbc_str)
+        bc = BCTranslator(var_str, dbc_str)
+        bc_type = "d"
     elif nbc_str != "":
-        nbc = BCTranslator(var_str, nbc_str)
+        bc = BCTranslator(var_str, nbc_str)
+        bc_type = "n"
     else:
+        bc = None
+        bc_type = None
         print("no bc found")
     
+    backbone.get_equations(p.get(), bc.get(), bc_type)
     return {"status": "ok"}
 
 @app.route('/submitNN', methods=['POST'])
@@ -88,6 +145,10 @@ def runTrain():
         dropout = json_arr["dropout"]
         opt = json_arr["opt"]
         loss = json_arr["loss"]
+        n_domain = json_arr["n_domain"]
+        n_bc = json_arr["n_bc"]
+        n_test = json_arr["n_test"]
+        dist = json_arr["dist"]
     else:
         arch = []
         lr = 0
@@ -98,6 +159,15 @@ def runTrain():
         dropout = 0
         opt = ""
         loss = ""
+        n_domain = 0
+        n_bc = 0
+        n_test = 0
+        dist = ""
+
+    # import pdb; pdb.set_trace()
+    param_list = [arch, lr, act, reg, init, batch, dropout, opt, loss, n_domain, n_bc, n_test, dist]
+    backbone.get_net(param_list)
+    backbone.run()
         
 
     return {"status": "ok"}

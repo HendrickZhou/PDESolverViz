@@ -67,6 +67,28 @@
             </select>
             <span>选择损失函数: {{ loss }}</span>
         </div>
+
+        <div id="domain_dp">
+            <input v-model="domain_dp" placeholder="数据量" min="0" class="item">
+            <span>计算域中的数据集大小:{{ domain_dp }}</span>
+        </div>
+        <div id="bc_dp">
+            <input v-model="bc_dp" placeholder="数据量" min="0" class="item">
+            <span>边界上的数据集大小:{{ bc_dp }}</span>
+        </div>
+        <div id="test_dp">
+            <input v-model="test_dp" placeholder="数据量" min="0" class="item">
+            <span>测试集大小:{{ test_dp }}</span>
+        </div>
+        <div id="dist">
+            <select v-model="dist" class="item">
+            <option disabled value="">请选择</option>
+            <option v-for="option in dist_ops" :key="option">
+              {{ option }}
+            </option>
+            </select>
+            <span>选择数据采样分布: {{ dist }}</span>
+        </div>
     </div>
     <br>
    </div>
@@ -102,11 +124,16 @@ export default {
             dropout: 0,
             opt: "adam",
             loss: "MSE",
+            domain_dp: 1000,
+            bc_dp: 100,
+            test_dp: 1200,
+            dist: "sobol",
             act_ops: ["relu", "elu", "selu", "sigmoid", "tanh", "sin", "swish"],
             reg_ops: [
                 {value: "l1" , text: "L1正则化"},
                 {value: "l2", text : "L2正则化"},
                 {value: "l1+l2", text : "L1+L2正则化"},
+                {value: "None", text : "不使用正则化"},
             ],
             init_ops: [
                 "zeros", "He normal", "LeCun normal", "Glorot normal","Orthogonal"
@@ -131,6 +158,9 @@ export default {
                 {value: "softmax cross entropy", text: "softmax cross entropy"},
                 {value: "zero", text: "zero"},
             ],
+            dist_ops: [
+                "uniform", "pseudo", "sobol" 
+            ]
         }
     },
     methods: {
@@ -147,6 +177,10 @@ export default {
                 "dropout": this.dropout,
                 "opt": this.opt,
                 "loss": this.loss,
+                "n_domain": this.domain_dp,
+                "n_bc": this.bc_dp,
+                "n_test": this.test_dp,
+                "dist": this.dist,
             }
             axios.post(path, content)
             .then((res) => {
