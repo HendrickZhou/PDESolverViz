@@ -35,6 +35,9 @@ export default {
         onPrompt(str) {
             this.$refs.prompt.newPrompt(str);
         },
+        onGeoDoneEditor(jsonObj) {
+            this.$emit('onGeoDoneStudio', jsonObj);
+        },
         getHeight() {
             this.boxHeight = this.$refs.ed.clientHeight; 
             console.log(this.boxHeight);

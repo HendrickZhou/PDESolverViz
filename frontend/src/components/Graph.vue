@@ -6,49 +6,54 @@
 
 <script>
 import * as Three from 'three';
+import * as echarts from 'echarts';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Lut } from 'three/examples/jsm/math/Lut.js';
 import CSG from '../util/three-csg.js';
 
 export default {
   name: 'ThreeTest',
   data() {
     return {
+      container: null,
       camera: null,
       scene: null,
+      orthoCamera: null,
+      ui_scene: null,
       renderer: null,
       mesh: null,
-      control: null,
+      controls: null,
       know_vars: {},
+      meshResult: null,
+      mode: '',
+      xData: [],
+      yData: [],
+      r_data: [
+     [
+        echarts.number.round(3.8),
+        echarts.number.round(4)
+     ],
+     [
+        echarts.number.round(3.8),
+        echarts.number.round(4.5)
+     ],
+     [
+        echarts.number.round(5),
+        echarts.number.round(6)
+     ]],
+
     }
   },
   methods: {
-    createHeightMap(){
-      var canvas = document.createElement("canvas");
-      canvas.width = 256;
-      canvas.height = 256;
-      var ctx = canvas.getContext("2d");
-      ctx.fillStyle = "black";
-      ctx.fillRect(0, 0, 256, 256);
-      for(let i = 0; i < 100; i++){
-        var x = Math.floor(Math.random() * 255);
-          var y = Math.floor(Math.random() * 255);
-          var radius = 50;
-          var grd = ctx.createRadialGradient(x, y, 1, x, y, radius);
-          var h8 = Math.floor(Math.random() * 255);
-          grd.addColorStop(0, "rgb("+ h8 + "," + h8 + "," + h8 +")");
-          grd.addColorStop(1, "transparent");
-          ctx.fillStyle = grd;
-          ctx.fillRect(0, 0, 256, 256);
-      }
-      return new Three.CanvasTexture(canvas);
-    },
-    parseGeoJson: function() {
-      var jsonObj = JSON.parse('{"id": "result", "content": null, "children": [{"id": "Add", "content": null, "children": [{"id": "e", "content": null, "children": [{"id": "Add", "content": null, "children": [{"id": "e1", "content": {"params": [[0, 0], [0.5, 0.5]], "type": "Rectangle"}, "children": []}, {"id": "e2", "content": {"params": [[0, 0], 3], "type": "Disk"}, "children": []}]}]}, {"id": "e1", "content": {"params": [[0, 0], [1, 1]], "type": "Rectangle"}, "children": []}]}]}');
+    parseGeoJson: function(json) {
+      var jsonObj = JSON.parse('{ "id": "result", "content": null, "children": [ { "id": "BitAnd", "content": null, "children": [ { "id": "e", "content": null, "children": [ { "id": "BitAnd", "content": null, "children": [ { "id": "e1", "content": { "params": [ [ 0, 0 ], [ 1, 1 ] ], "type": "Rectangle" }, "children": [] }, { "id": "e2", "content": { "params": [ [ 0, 0 ], 1 ], "type": "Disk" }, "children": [] } ] } ] }, { "id": "e1", "content": { "params": [ [ 0, 0 ], [ 1, 1 ] ], "type": "Rectangle" }, "children": []}]}]}');
+      // var jsonObj = JSON.parse(json)
       var result_id = jsonObj.id;
+      this.mode = "2d"
+      // this.mode = jsonObj.mode;
       this.traverse(jsonObj);
       let bspResult = this.know_vars[result_id];
-      let meshResult = CSG.toMesh(bspResult, new Three.Matrix4());
-      return meshResult;
+      this.meshResult = CSG.toMesh(bspResult, new Three.Matrix4());
     },
     traverse: function(treeObj) {
       if( treeObj.children[0] != null && typeof treeObj == "object" ) {
@@ -114,32 +119,104 @@ export default {
         return null;
       }
     },
-    init: function() {
-        let container = document.getElementById('container');
 
-        this.camera = new Three.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.01, 10);
-        this.camera.position.z = 1;
+
+    init: function(jsonObj) {
+      this.parseGeoJson(jsonObj);
+      if(this.mode=="2d") {
+        this.initEcharts();
+      }
+      else if(this.mode == "3d") {
+        return
+      }
+    },
+
+    initEcharts: function() {
+      this.charts = echarts.init(document.getElementById("container"));
+      var option = {
+          xAxis: {},
+          yAxis: {},
+          series: [
+              {
+                  type: 'custom',
+                  renderItem: this.renderItem,
+                  data: this.r_data
+              }
+          ]
+      };
+      this.charts.setOption(option);
+    },
+
+    renderItem: function(params, api) {
+        if (params.context.rendered) {
+            return;
+        }
+
+        params.context.rendered = true;
+
+        let points = [];
+        for (let i = 0; i < this.r_data.length; i++) {
+            points.push(api.coord(this.r_data[i]));
+        }
+
+        let color = api.visual('color');
+
+        return {
+            type: 'polygon',
+            shape: {
+                points: echarts.graphic.clipPointsByRect(points, {
+                    x: params.coordSys.x,
+                    y: params.coordSys.y,
+                    width: params.coordSys.width,
+                    height: params.coordSys.height
+                })
+            },
+            style: api.style({
+                fill: color,
+                stroke: echarts.color.lift(color)
+            })
+        };
+    },
+
+
+
+    old_init: function() {
+        this.container = document.getElementById('container');
+
+
+        // 1.建立相机 和 场景，包括了主视图还有UI
+        this.camera = new Three.PerspectiveCamera(70, this.container.clientWidth/this.container.clientHeight, 1, 100);
+        this.camera.position.set( 5, 5, 5 );
+        const pointLight = new Three.PointLight( 0xffffff, 1 );
+				this.camera.add( pointLight );
+
+        this.orthoCamera = new Three.OrthographicCamera( - 1, 1, 1, - 1, 1, 2 );
+				this.orthoCamera.position.set( 0.5, 0, 1 );
 
         this.scene = new Three.Scene();
+        this.scene.background = new Three.Color( 0xffffff );
+        this.scene.add(this.camera);
 
-        let geometry = new Three.BoxGeometry(5, 1, 1);
-        // let meshA = new Three.Mesh(new Three.BoxGeometry(0.5,0.5,0.5));
-        // let meshB = new Three.Mesh(new Three.BoxGeometry(0.5,0.5,0.5));
-        // meshB.position.add(new Three.Vector3( 0.25, 0.25, 0.25));
-        // meshA.updateMatrix();
-        // meshB.updateMatrix();
-        // let bspA = CSG.fromMesh( meshA );                        
-        // let bspB = CSG.fromMesh( meshB );
-        // let bspResult = bspA.subtract(bspB);
-        // let meshResult = CSG.toMesh( bspResult, meshA.matrix, meshA.material )
-        let meshResult = this.parseGeoJson();
+        this.ui_scene = new Three.Scene();
+
+
+
+        let lut = new Lut();
+        let sprite = new Three.Sprite( new Three.SpriteMaterial( {
+					map: new Three.CanvasTexture( lut.createCanvas() )
+				} ) );
+				sprite.scale.x = 0.125;
+				this.ui_scene.add( sprite );
+
+
+
+        this.parseGeoJson();
         let material = new Three.MeshNormalMaterial();
-        meshResult.material = material;
-        // this.mesh = meshResult;
-        this.mesh = new Three.Mesh(geometry, material);
-        // this.scene.add(this.mesh);
-        const size = 10;
+        this.meshResult.material = material;
+        this.scene.add(this.meshResult);
+        
 
+        const size = 10;
         const divisions = 10;
         const gridHelper = new Three.GridHelper( size, divisions );
         this.scene.add( gridHelper );
@@ -149,14 +226,13 @@ export default {
         // this.mesh.geometry.computeBoundingBox();
         // const box = new Three.Box3().setFromObject( this.mesh );
         // const bb = new Three.Box3Helper(box, 0xffff00);
-
         // this.scene.add(bb);
         // this.scene.add(this.mesh)
 
 
         this.renderer = new Three.WebGLRenderer({antialias: true});
-        this.renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(this.renderer.domElement);
+        this.container.appendChild(this.renderer.domElement);
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
 
         // window.addEventListener( 'resize', onWindowResize );
 
@@ -165,71 +241,37 @@ export default {
 
         // this.scene.add(new THREE.GridHelper(50, 25, 0x000040, 0x000040));
 
-
-        var heatVertex = `
-          uniform sampler2D heightMap;
-          uniform float heightRatio;
-          varying vec2 vUv;
-          varying float hValue;
-          void main() {
-            vUv = uv;
-            vec3 pos = position;
-            hValue = texture2D(heightMap, vUv).r;
-            pos.y = hValue * heightRatio;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
-          }
-        `;
-        
-        var heatFragment = `
-          varying float hValue;
-          vec3 heatmapGradient(float t) {
-            return clamp((pow(t, 1.5) * 0.8 + 0.2) * vec3(smoothstep(0.0, 0.35, t) + t * 0.5, smoothstep(0.5, 1.0, t), max(1.0 - t * 1.7, t * 7.0 - 6.0)), 0.0, 1.0);
-          }
-
-          void main() {
-            float v = abs(hValue - 1.);
-            gl_FragColor = vec4(heatmapGradient(hValue), 1. - v * v) ;
-          }
-        `;
-        var heightMap = this.createHeightMap();
-        var planeGeometry = new Three.PlaneBufferGeometry(50, 50, 1000, 1000);
-        planeGeometry.rotateX(-Math.PI * 0.5);
-        var heat = new Three.Mesh(planeGeometry, new Three.ShaderMaterial({
-          uniforms: {
-            heightMap: {value: heightMap},
-            heightRatio: {value: 10}
-          },
-          vertexShader: heatVertex,
-          fragmentShader: heatFragment,
-          transparent: true
-        }));
-
-        this.scene.add(heat);
-
     },
     animate: function() {
         requestAnimationFrame(this.animate);
         // this.mesh.rotation.x += 0.01;
         // this.mesh.rotation.y += 0.02;
         this.controls.update();
+        this.renderer.clear();
         this.renderer.render(this.scene, this.camera);
+        // this.renderer.render(this.ui_scene, this.orthoCamera );
+    },
+    onWindowResize: function() {
+      this.camera.aspect = this.container.clientWidth/this.container.clientHeight;
+			this.camera.updateProjectionMatrix();
+      this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     }
   },
   mounted() {
-      this.init();
-      this.animate();
+      this.initEcharts();
+      // this.animate();
   }
 }
 </script>
 
 <style scoped>
 #graph {
-  width: 50%;
+  width: 70%;
   height: 100%;
 }
 #container {
   width: 100%;
-  height: 75%;
+  height: 60%;
   background-color: rgb(243, 224, 224);
   display: flex;
 }

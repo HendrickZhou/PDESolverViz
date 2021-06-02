@@ -3,6 +3,36 @@ from __future__ import division
 from __future__ import print_function
 
 import deepxde as dde
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle, Polygon
+import numpy as np
+
+def save_heatmap_data(model, geom):
+    x = np.linspace(0, 2, 200)
+    y = np.linspace(0, 2, 200)
+    y_m, x_m = np.meshgrid(y, x)
+    z = np.zeros((200, 200)) #(x,y)
+    for xi, i in enumerate(x):
+        for yi, j in enumerate(y):
+            X = np.array([i, j])
+            X = np.reshape(X, [1,2])
+            if geom.inside([i,j]):
+                z[xi,yi] = model.predict(X)
+            else:
+                z[xi,yi] = 0
+    
+    z_min, z_max = -np.abs(z).max(), np.abs(z).max()
+
+    fig, ax = plt.subplots()
+    c = ax.pcolormesh(x_m, y_m, z, cmap='RdBu', vmin=z_min, vmax=z_max)
+    ax.set_title('2D')
+    ax.axis([x_m.min(), x_m.max(), y_m.min(), y_m.max()])
+    fig.colorbar(c, ax=ax)
+
+    # shape = 
+    # ax.add_collection()
+
+    plt.show()
 
 
 def main():
@@ -24,10 +54,12 @@ def main():
     model = dde.Model(data, net)
 
     model.compile("adam", lr=0.001)
-    model.train(epochs=10000)
+    model.train(epochs=1000)
     model.compile("L-BFGS-B")
     losshistory, train_state = model.train()
+    save_heatmap_data(model, geom)
     dde.saveplot(losshistory, train_state, issave=True, isplot=True)
+
 
 
 if __name__ == "__main__":

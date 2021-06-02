@@ -11,7 +11,7 @@
 		<!--explorer+spec-->
         <router-view></router-view>
 		<VDrag></VDrag>
-        <Graph></Graph>
+        <Graph ref="grap"></Graph>
 	</div>
 
 	<!--bottom info bar-->
@@ -32,6 +32,11 @@ export default {
         Graph,
         VDrag,
     },
+    methods: {
+        onGeoDoneStudio(jsonObj) {
+            this.$refs.grap.init(jsonObj);
+        }
+    }
 
 };
 </script>

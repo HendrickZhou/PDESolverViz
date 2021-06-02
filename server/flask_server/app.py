@@ -22,6 +22,7 @@ DEBUG = True
 # instantiate the app
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['JSON_SORT_KEYS'] = False
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
@@ -95,8 +96,9 @@ def getCode():
     script_name = str(datetime.datetime.now()) + '.json'
     with open('./cache/' + script_name, 'w') as f:
         json.dump(json_stream, f, indent=2)
-    
-    return {"prompt" : str(xde_obj_dicts)}
+
+    return jsonify(json_stream)
+    # return {"prompt" : str(xde_obj_dicts)}
 
 @app.route('/submitPDE', methods=['POST'])
 def getPDE():

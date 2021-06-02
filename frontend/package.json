@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@tensorflow/tfjs-core": "^3.6.0",
+    "@tensorflow/tfjs-vis": "^1.5.1",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
     "bootstrap-vue": "^2.21.2",
@@ -48,7 +50,6 @@
     },
     "rules": {
       "no-unused-vars": 0,
-      "no-unused-vars":0,
       "no-constant-condition": 0,
       "no-undef": 0
     }

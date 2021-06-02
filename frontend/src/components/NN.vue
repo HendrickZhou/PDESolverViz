@@ -111,6 +111,7 @@ import 'vue-material-design-icons/styles.css';
 import Arc from '@/components/Arc.vue';
 import Plot from '@/components/Plot.vue';
 import axios from 'axios';
+// import tfvis from '@tensorflow/tfjs-vis';
 
 export default {
     name: "NN",
@@ -160,10 +161,13 @@ export default {
             ],
             dist_ops: [
                 "uniform", "pseudo", "sobol" 
-            ]
+            ],
+
         }
     },
     methods: {
+
+
         saveAndTrain() {
             var layer_arr = this.$refs.arc.getLayer();
             const path = 'http://localhost:5000/submitNN';
