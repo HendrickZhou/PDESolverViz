@@ -121,7 +121,7 @@ class Transpiler:
         include: ast pruning(optimization), deepxde code build, geometry json generation
     '''
     script_globals = ["primitive"]
-    mode_flag = {"2D":1, "3D":2}
+    mode_flag = {"1D":0, "2D":1, "3D":2}
 
     def __init__(self, code_source):
         if local:
@@ -130,12 +130,14 @@ class Transpiler:
             self.context = _Context(code_source) # code source is string by default
         self.code_def = self.context.code_def
         self.code_export = self.context.code_export
+        self.code_config = self.context.code_config
 
     def run(self):
         self._pruning()
         self._compile_and_run()
         json_stream = self.geo_proto(self.result_tree)
-        return self.code_result_dict, json_stream
+        json_stream.update({"mode":self.mode})
+        return self.code_result_dict, json_stream, self.final_globals["config_mode"]
         
     @staticmethod
     def import_mod(name):
@@ -190,8 +192,10 @@ class Transpiler:
 
     def _compile_and_run(self):
         # config
-        mode_flag = 1
-        globals_freevars = {"config_var_mode" : self.mode_flag["2D"]}
+        lineo = self.code_config.split(":")
+        lineo = [a.strip() for a in lineo]
+        self.mode = lineo[1]
+        globals_freevars = {"config_mode" : self.mode_flag[self.mode]}
 
         # main
         self.main_code_obj = compile(self.code_def, filename='<string>', mode='exec')

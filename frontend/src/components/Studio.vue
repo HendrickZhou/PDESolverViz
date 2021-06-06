@@ -9,7 +9,7 @@
 		<!--选择完project后，默认展开editor+graph-->
 		<!--除此外的组合：PDE builder+graph; NN+graph; 或者单独graph+info tab-->
 		<!--explorer+spec-->
-        <router-view></router-view>
+        <router-view @onGeoDoneStudio='onGeoDoneStudio' @onTrainDone='onTrainDone'></router-view>
 		<VDrag></VDrag>
         <Graph ref="grap"></Graph>
 	</div>
@@ -35,6 +35,9 @@ export default {
     methods: {
         onGeoDoneStudio(jsonObj) {
             this.$refs.grap.init(jsonObj);
+        },
+        onTrainDone(data) {
+            this.$refs.grap.drawData(data);
         }
     }
 

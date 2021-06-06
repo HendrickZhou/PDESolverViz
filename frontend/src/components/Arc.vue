@@ -31,8 +31,9 @@ export default {
         return {
             layers : [
                 {"value": 10},
-                {"value": 5},
-                {"value": 2}
+                {"value": 10},
+                {"value": 10},
+                {"value": 10},
             ],
         }
     },

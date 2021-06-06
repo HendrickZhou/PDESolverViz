@@ -10,8 +10,10 @@ sys.path.insert(0, pack_path)
 from equations import PoissonTranslator, BCTranslator
 from geo_script import Transpiler
 import deepxde as dde
+from .util import TrainLossCallback
 
 import matplotlib
+import numpy as np
 matplotlib.use('agg')
 
 import json
@@ -27,16 +29,24 @@ app.config['JSON_SORT_KEYS'] = False
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 
+loss_data = []
 class Backbone:
     def __init__(self):
         super().__init__()
-    
+        
     @staticmethod
     def boundary(_, on_boundary):
         return on_boundary
 
-    def get_geo(self, xde_obj):
+    @staticmethod
+    def save_loss_data_ajax(train_loss):
+        # [loss, epoch number]
+        loss_data.append(train_loss)
+
+
+    def get_geo(self, xde_obj, mode):
         self.geom = xde_obj
+        self.mode = mode
 
     def get_equations(self, poisson, bc, bc_type):
         if bc_type == "d": #dirichlet
@@ -69,13 +79,45 @@ class Backbone:
         )
 
     def run(self):
-        losshistory, train_state = self.model.train(epochs=5000)
-        dde.saveplot(losshistory, train_state, issave=False, isplot=True)
+        losscb = TrainLossCallback(self.save_loss_data_ajax)
+        losshistory, train_state = self.model.train(epochs=1000, callbacks=[losscb,])
+        # self.model.compile("L-BFGS-B")
+        # self.model.train()
+        z = []
+        for i in range(201):
+            for j in range(201):
+                x = i * 0.01
+                y = j * 0.01
+                X = np.array([x, y])
+                X = np.reshape(X, [1,2])
+                if self.geom.inside([x,y]):
+                    z_np = self.model.predict(X)
+                    z.append(str(z_np[0,0]))
+                else:
+                    z.append(0)
+        return z
     
 
 backbone = Backbone()
 
-
+# last_idx = 0
+# cur_idx = 0
+@app.route('/getLoss', methods=['GET'])
+def getLossData():
+    # global last_idx, cur_idx
+    # cur_idx = len(loss_data)
+    # if cur_idx == last_idx: # no more
+    #     result = {"flag": "over"}
+    # else:
+    #     chunck = loss_data[last_idx: cur_idx]
+    #     last_idx = cur_idx
+    #     result = {"flag": None, "loss":chunck}
+    # return jsonify(result)
+    global loss_data
+    result = loss_data
+    loss_data = []
+    return jsonify({"loss":result})
+    
 
 @app.route('/submitCode', methods=['POST'])
 def getCode():
@@ -85,17 +127,17 @@ def getCode():
         code_data = None
     print(code_data)
     c = Transpiler(code_data)
-    xde_obj_dicts, json_stream = c.run()
+    xde_obj_dicts, json_stream, mode = c.run()
     print(json_stream)
     # build xde model
     geom_obj_id = xde_obj_dicts["target_id"]
-    backbone.get_geo(xde_obj_dicts[geom_obj_id].xde_geom)
+    backbone.get_geo(xde_obj_dicts[geom_obj_id].xde_geom, mode)
     # transmit json file
     # mock the project id 
-    import datetime
-    script_name = str(datetime.datetime.now()) + '.json'
-    with open('./cache/' + script_name, 'w') as f:
-        json.dump(json_stream, f, indent=2)
+    # import datetime
+    # script_name = str(datetime.datetime.now()) + '.json'
+    # with open('./cache/' + script_name, 'w') as f:
+    #     json.dump(json_stream, f, indent=2)
 
     return jsonify(json_stream)
     # return {"prompt" : str(xde_obj_dicts)}
@@ -169,10 +211,9 @@ def runTrain():
     # import pdb; pdb.set_trace()
     param_list = [arch, lr, act, reg, init, batch, dropout, opt, loss, n_domain, n_bc, n_test, dist]
     backbone.get_net(param_list)
-    backbone.run()
-        
-
-    return {"status": "ok"}
+    data = backbone.run()
+    print(data)
+    return jsonify({"data": data})
 
     
 

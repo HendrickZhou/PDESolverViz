@@ -30,7 +30,6 @@
         const path = 'http://localhost:5000/submitCode';
         axios.post(path, {"code": this.code})
           .then((res) => {
-            // this.$emit('onPrompt', res.data.prompt);
             this.$emit('onPrompt', res.data);
             this.$emit('onGeoDoneEditor', res.data);
             alert("计算域构建成功")

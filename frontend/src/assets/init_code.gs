@@ -7,7 +7,7 @@ e1 = Rectangle(
     [1,1]
 )
 e2 = Disk(
-    [0,0],
+    [1,1],
     1
 )
 ei1 = Interval(0,1)

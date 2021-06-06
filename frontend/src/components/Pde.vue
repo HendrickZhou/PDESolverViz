@@ -27,10 +27,10 @@ export default {
     name: "Pde",
     data() {
         return {
-            poisson: '',
+            poisson: '{x,y}, -1',
             var_names: '',
             poisson_body: '',
-            dbc: '',
+            dbc: '0',
             nbc: ''
         }
     },

@@ -1,5 +1,7 @@
 <template>
+<div id="wrapper">
 <div id="plot"></div>
+</div>
 </template>
 
 <script>
@@ -12,35 +14,45 @@ export default {
     data() {
         return {
             charts: '',
-            sample: [
-                { index: 0, value: 50 },
-                { index: 1, value: 100 },
-                { index: 2, value: 150 },
+            timer: '',
+            valueList: [
+                [ 0, 0 ],
             ],
         }
     },
     methods: {
-        sampleViz() {
-            tfvis.render.linechart(document.getElementById('plot'), this.sample, {width:400});
-        },
-        initLine(id) {
-            this.charts = echarts.init(document.getElementById(id))
+        initChart() {
+            this.charts = echarts.init(document.getElementById('plot'));
             this.charts.setOption({
+                height: '180',
+                width: 'auto',
                 title: {
-                    text: 'Dynamic data + time axis'
+                    left: 'center',
+                    text: '训练Loss曲线'
+                },
+                visualMap: [{
+                    show: false,
+                    type: 'continuous',
+                    seriesIndex: 0,
+                    min: 0,
+                    max: 400
+                },],
+                grid:{
+                backgroundColor: 'white',
+                show: true
                 },
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (params) {
-                        params = params[0]
-                        return params.value[0] + ' : ' + params.value[1]
+                        params = params[0];
+                        var date = new Date(params.name);
+                        return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' : ' + params.value[1];
                     },
                     axisPointer: {
                         animation: false
                     }
                 },
                 xAxis: {
-                    type: 'time',
                     splitLine: {
                         show: false
                     }
@@ -52,67 +64,59 @@ export default {
                         show: false
                     }
                 },
+                series: [{
+                    type: 'line',
+                    showSymbol: false,
+                    data: this.valueList,
+                    hoverAnimation: false,
+                },],
                 animation: false
             })
         },
+
+        // onNewData() {
+        //     this.timer = window.setInterval(this.fetchLossData, 5); // 5ms 12fps
+        // },
+        fetchLossData(){
+            const path = 'http://localhost:5000/getLoss';
+            axios.get(path)
+            .then((res) => {
+                // console.log(res);
+                // if(res.flag == "over"){
+                //     window.clearInterval(this.timer);
+                // }
+                // else {
+                    // append new_data
+                    // console.log(this.valueList)
+                    this.valueList = this.valueList.concat(res.data.loss)
+                    // console.log(this.valueList)
+                    this.charts.setOption({
+                        series: [{
+                            data: this.valueList
+                        }]
+                    });
+                // }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        },
+
     },
     mounted(){
-        // this.$nextTick(function() {
-        //     this.initLine('plot')
-        //     this.charts.setOption({
-        //         series : [
-        //             {
-        //                 name: 'Analog data 0',
-        //                 type : 'line',
-        //                 showSymbol : false,
-        //                 hoverAnimation : false,
-        //                 data : [['2018-01-02', '3'],['2018-01-05', '4']]
-        //             }
-        //         ]
-        //     })
-            
-        //     setTimeout(() => {
-        //         this.charts.appendData({
-        //             seriesIndex:0,
-        //             data : [['2018-01-03', '1'],['2018-01-07', '2']]
-        //         })
-        //     },2000)
-            
-        //     setTimeout(() => {
-        //         this.charts.resize();    
-        //     },4000)
-
-        //     setTimeout(() => {
-        //         this.charts.setOption({
-        //             series : [
-        //                 {},
-        //                 {
-        //                                                         name: 'Analog data 1',
-        //                     type : 'line',
-        //                     showSymbol : false,
-        //                     hoverAnimation : false,
-        //                     data : [['2018-01-02', '5'],['2018-01-05', '10']]
-        //                 }
-        //             ]
-        //         })
-        //         this.charts.appendData({
-        //             seriesIndex:1,
-        //             data : [['2018-01-03', '11'],['2018-01-10', '2']]
-        //         })
-        //     },6000) 
-        //     setTimeout(() => {
-        //         this.charts.resize();    
-        //     },8000)
-        // })
-        this.sampleViz()
+        this.initChart();
     }
 
 }
 </script>
 
-<style scoped>
-#plot {
+<style>
+#wrapper {
     width: 100%;
     height: 40%;
+}
+#plot {
+    width: 100%;
+    height: 100%;
 }
 </style>

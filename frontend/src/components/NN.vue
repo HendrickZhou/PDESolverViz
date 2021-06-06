@@ -99,7 +99,7 @@
     <div class="title">开始训练</div>
 </div>
 
-<Plot></Plot>
+<Plot ref="plot"></Plot>
 
 </div>
 </template>
@@ -111,17 +111,16 @@ import 'vue-material-design-icons/styles.css';
 import Arc from '@/components/Arc.vue';
 import Plot from '@/components/Plot.vue';
 import axios from 'axios';
-// import tfvis from '@tensorflow/tfjs-vis';
 
 export default {
     name: "NN",
     data() {
         return {
-            lr: 1,
-            act: "relu",
+            lr: 0.01,
+            act: "tanh",
             reg: "l1",
             init: "LeCun normal",
-            batch: "None",
+            batch: "after",
             dropout: 0,
             opt: "adam",
             loss: "MSE",
@@ -166,34 +165,35 @@ export default {
         }
     },
     methods: {
-
-
         saveAndTrain() {
             var layer_arr = this.$refs.arc.getLayer();
             const path = 'http://localhost:5000/submitNN';
             var content = {
                 "arch": layer_arr,
-                "lr": this.lr,
+                "lr": parseFloat(this.lr),
                 "act": this.act,
                 "reg": this.reg,
                 "init": this.init,
                 "batch": this.batch,
-                "dropout": this.dropout,
+                "dropout": parseFloat(this.dropout),
                 "opt": this.opt,
                 "loss": this.loss,
-                "n_domain": this.domain_dp,
-                "n_bc": this.bc_dp,
-                "n_test": this.test_dp,
+                "n_domain": parseInt(this.domain_dp),
+                "n_bc": parseInt(this.bc_dp),
+                "n_test": parseInt(this.test_dp),
                 "dist": this.dist,
             }
             axios.post(path, content)
             .then((res) => {
-                console.log(res);
+                this.$refs.plot.fetchLossData();
+                // load model data
+                this.$emit('onTrainDone', res.data);
             })
             .catch((error) => {
                 console.error(error);
             });
         },
+
     },
     components: {
         // MenuIcon,

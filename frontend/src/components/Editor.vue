@@ -1,7 +1,7 @@
 <template>
 <div id="editor" ref="ed">
     <div id="epad-header">GeoScript Editor</div>
-    <Epad v-bind:style="{height: epadH + '%'}" ref="formCode" @onPrompt='onPrompt'></Epad>
+    <Epad v-bind:style="{height: epadH + '%'}" ref="formCode" @onPrompt='onPrompt' @onGeoDoneEditor="onGeoDoneEditor"></Epad>
     <HDrag @onDrag='onDrag'></HDrag>
     <Econsole @onClickRun="onClickRun" ref="prompt"></Econsole>
 </div>
@@ -40,7 +40,6 @@ export default {
         },
         getHeight() {
             this.boxHeight = this.$refs.ed.clientHeight; 
-            console.log(this.boxHeight);
         },
         onDrag(deltaH) {
             this.epadH -= 100 * (deltaH / this.boxHeight);

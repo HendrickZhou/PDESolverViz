@@ -1,12 +1,15 @@
 <template>
     <div id="graph">
-      <div id="container"></div>
+      <div id="main-view"></div>
+      <div id="splitter"></div>
+      <div id="vice-view"></div>
     </div>
 </template>
 
 <script>
 import * as Three from 'three';
 import * as echarts from 'echarts';
+import 'echarts-gl';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Lut } from 'three/examples/jsm/math/Lut.js';
 import CSG from '../util/three-csg.js';
@@ -45,6 +48,9 @@ export default {
     }
   },
   methods: {
+    //////////////////
+    // UTILS
+    //////////////////
     parseGeoJson: function(json) {
       var jsonObj = JSON.parse('{ "id": "result", "content": null, "children": [ { "id": "BitAnd", "content": null, "children": [ { "id": "e", "content": null, "children": [ { "id": "BitAnd", "content": null, "children": [ { "id": "e1", "content": { "params": [ [ 0, 0 ], [ 1, 1 ] ], "type": "Rectangle" }, "children": [] }, { "id": "e2", "content": { "params": [ [ 0, 0 ], 1 ], "type": "Disk" }, "children": [] } ] } ] }, { "id": "e1", "content": { "params": [ [ 0, 0 ], [ 1, 1 ] ], "type": "Rectangle" }, "children": []}]}]}');
       // var jsonObj = JSON.parse(json)
@@ -120,20 +126,99 @@ export default {
       }
     },
 
-
+    //////////////////
+    // ENTRY
+    //////////////////
     init: function(jsonObj) {
-      this.parseGeoJson(jsonObj);
-      if(this.mode=="2d") {
+      console.log(jsonObj)
+      this.mode = jsonObj.mode;
+      delete jsonObj.mode
+      // this.parseGeoJson(jsonObj);
+      console.log(this.mode);
+      if(this.mode=="2D") {
         this.initEcharts();
+        this.init_geo();
       }
-      else if(this.mode == "3d") {
+      else if(this.mode == "3D") {
+        return
+      }
+      else if(this.mode == "1D") {
         return
       }
     },
 
+    //////////////////
+    // 1D CHARTS
+    //////////////////
+
+
+    //////////////////
+    // 2D CHARTS
+    //////////////////
     initEcharts: function() {
-      this.charts = echarts.init(document.getElementById("container"));
-      var option = {
+      this.charts = echarts.init(document.getElementById("main-view"));
+      this.charts_v = echarts.init(document.getElementById("vice-view"));
+
+      var option_1 = {
+          tooltip: {},
+          backgroundColor: '#fff',
+          visualMap: {
+              show: false,
+              dimension: 2,
+              min: -10,
+              max: 10,
+              inRange: {
+                  color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+              }
+          },
+          xAxis3D: {
+              type: 'value',
+              scale: true,
+          },
+          yAxis3D: {
+              type: 'value',
+              scale: true,
+          },
+          zAxis3D: {
+              type: 'value'
+
+          },
+          grid3D: {
+              axisPointer: {
+                  show: false
+              },
+              viewControl: {
+                  distance: 100
+              },
+              postEffect: {
+                  enable: true
+              },
+          },
+          series: [{
+              type: 'surface',
+              wireframe: {
+                  // show: false
+              },
+              equation: {
+                  x: {
+                      step: 0.05
+                  },
+                  y: {
+                      step: 0.05
+                  },
+                  z: function (x, y) {
+                      // if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1) {
+                      //     return '-';
+                      // }
+                      // return Math.sin(x * Math.PI) * Math.sin(y * Math.PI);
+                      return '-'
+                  }
+              }
+          }]
+      }
+      this.charts.setOption(option_1);
+
+      var option_2 = {
           xAxis: {},
           yAxis: {},
           series: [
@@ -144,7 +229,95 @@ export default {
               }
           ]
       };
-      this.charts.setOption(option);
+      this.charts_v.setOption(option_2);
+    },
+
+    init_geo: function() {
+      this.charts.setOption({
+        series: [{
+          type: 'surface',
+          wireframe: {
+              show: false
+          },
+          equation: {
+              x: {
+                  step: 0.01,
+                  max: 2,
+                  min:0,
+              },
+              y: {
+                  step: 0.01,
+                  max:2,
+                  min:0,
+              },
+              z: function (x, y) {
+                var inCircle = false;
+                var inRec = false;
+                if(Math.pow(x-1,2)+Math.pow(y-1,2)<1){
+                  inCircle = true;
+                }
+                if (x < 1 && x>0 && y < 1 && y>0) {
+                  inRec = true
+                }
+                if(inCircle || inRec){
+                  return 0
+                }
+                else{
+                  return '-'
+                }                  
+              }
+          }
+        }]
+      })
+    },
+
+    drawData: function(data) {
+      //load
+      var vals = data.data;
+      console.log(vals);
+      this.charts.setOption({
+        series: [{
+          type: 'surface',
+          wireframe: {
+              show: false
+          },
+          equation: {
+              x: {
+                  step: 0.01,
+                  max: 2,
+                  min:0,
+              },
+              y: {
+                  step: 0.01,
+                  max:2,
+                  min:0,
+              },
+              z: function (x, y) {
+                var xi = Math.floor(x/0.01);
+                var yi = Math.floor(y/0.01);
+                var idx = 201 * xi + yi;
+                var inRec = false;
+                var inCircle = false;
+                if(Math.pow(x-1,2)+Math.pow(y-1,2)<1){
+                  inCircle = true;
+                }
+                if (x < 1 && x>0 && y < 1 && y>0) {
+                  inRec = true
+                }
+                if(inCircle || inRec){
+                  return parseFloat(vals[idx]);
+                }
+                else{
+                  return '-'
+                }  
+                // if(vals[idx] == 0){
+                //   return '-';
+                // }      
+                // return parseFloat(vals[idx]);
+              }
+          }
+        }]
+      })
     },
 
     renderItem: function(params, api) {
@@ -178,7 +351,9 @@ export default {
         };
     },
 
-
+    //////////////////
+    // 3D CHARTS
+    //////////////////
 
     old_init: function() {
         this.container = document.getElementById('container');
@@ -269,10 +444,21 @@ export default {
   width: 70%;
   height: 100%;
 }
-#container {
+#main-view {
   width: 100%;
   height: 60%;
   background-color: rgb(243, 224, 224);
   display: flex;
+}
+#vice-view {
+  width: 100%;
+  height: 40%;
+  background-color: rgb(243, 224, 224);
+  display: flex;
+}
+#splitter {
+    height: 10px;
+    width: 100%;
+    background-color: rgb(51, 45, 45);
 }
 </style>
